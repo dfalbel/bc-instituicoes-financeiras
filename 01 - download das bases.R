@@ -47,3 +47,10 @@ download(socie_url, socie_anos, socie_meses, "sociedades", "SOCIEDADES")
 download(admin_url, admin_anos, admin_meses, "consorcios", "ADMCONSORCIO")
 
 
+# Download de um arquivo que possui os códigos de conglomerados -----------
+
+# httr::GET("https://www3.bcb.gov.br/informes/rest/cadastros/conglomerado/", 
+#           httr::write_disk("data-raw/cadastro_conglomerados"))
+
+# Existe um arquivo que foi baixado na mão, que está disponível neste link:
+# https://www3.bcb.gov.br/informes/rest/cadastros/conglomerado/

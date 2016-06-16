@@ -17,7 +17,6 @@ l_ply(diretorios, function(dir){
   })
 }, .progress = "text")
 
-
 # Funções Auxiliares ------------------------------------------------------
 
 achar_primeira_completa <- function(base){
@@ -59,7 +58,8 @@ diretorios <- c("bancos", "conglomerados", "consorcios", "cooperativas", "socied
 names(diretorios) <- diretorios
 bases <- llply(diretorios, function(dir){
   arqs <- list.files(sprintf("data-raw/unzips/%s/", dir))
-  bases <- ldply(arqs[2], function(arq){
+  arqs <- arqs[!str_detect(arqs, fixed(".zip"))]
+  bases <- ldply(arqs, function(arq){
     b <- read_excel(sprintf("data-raw/unzips/%s/%s", dir, arq))
     b <- arrumar_base(b)
     b$ano <- str_sub(arq, 1, 4)
@@ -67,7 +67,7 @@ bases <- llply(diretorios, function(dir){
     b$tipo <- dir
     b
   })
-})
+}, .progress = "text")
 
 bases <- llply(bases, function(base){
   base %>%
