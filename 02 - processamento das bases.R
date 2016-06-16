@@ -55,59 +55,29 @@ arrumar_base <- function(base){
 # Juntar as bases ---------------------------------------------------------
 
 # processar a base de conglomerados
-
-dir <- "conglomerados"
-arqs <- list.files(sprintf("data-raw/unzips/%s/", dir))
-base_conglomerados <- ldply(arqs[2], function(arq){
-  b <- read_excel(sprintf("data-raw/unzips/%s/%s", dir, arq))
-  b <- arrumar_base(b)
-  b$ano <- str_sub(arq, 1, 4)
-  b$mes <- str_sub(arq, 5, 6)
-  b$tipo <- dir
-  b
+diretorios <- c("bancos", "conglomerados", "consorcios", "cooperativas", "sociedades")
+names(diretorios) <- diretorios
+bases <- llply(diretorios, function(dir){
+  arqs <- list.files(sprintf("data-raw/unzips/%s/", dir))
+  bases <- ldply(arqs[2], function(arq){
+    b <- read_excel(sprintf("data-raw/unzips/%s/%s", dir, arq))
+    b <- arrumar_base(b)
+    b$ano <- str_sub(arq, 1, 4)
+    b$mes <- str_sub(arq, 5, 6)
+    b$tipo <- dir
+    b
+  })
 })
-base_conglomerados <- base_conglomerados %>%
-  filter(!is.na(CNPJ), (str_sub(CNPJ,1,1) %>% str_detect("[0-9]")))
 
-write.csv(base_conglomerados, "data/base_conglomerados.csv", row.names = F)
-
-# processar a base de bancos
-dir <- "bancos"
-arqs <- list.files(sprintf("data-raw/unzips/%s/", dir))
-base_bancos <- ldply(arqs[2], function(arq){
-  b <- read_excel(sprintf("data-raw/unzips/%s/%s", dir, arq))
-  b <- arrumar_base(b)
-  b$ano <- str_sub(arq, 1, 4)
-  b$mes <- str_sub(arq, 5, 6)
-  b$tipo <- dir
-  b
+bases <- llply(bases, function(base){
+  base %>%
+    filter(!is.na(CNPJ), (str_sub(CNPJ,1,1) %>% str_detect("[0-9]")))
 })
-base_bancos <- base_bancos %>%
-  filter(!is.na(CNPJ), (str_sub(CNPJ,1,1) %>% str_detect("[0-9]")))
 
-write.csv(base_bancos, "data/base_bancos.csv", row.names = F)
-
-
-# bases <- ldply(diretorios, function(dir){
-#   arqs <- list.files(sprintf("data-raw/unzips/%s/", dir))
-#   bases <- ldply(arqs[2], function(arq){
-#     b <- read_excel(sprintf("data-raw/unzips/%s/%s", dir, arq))
-#     b <- arrumar_base(b)
-#     b$ano <- str_sub(arq, 1, 4)
-#     b$mes <- str_sub(arq, 5, 6)
-#     b$tipo <- dir
-#     b
-#   })
-# })
+for (nome in names(bases)) {
+  write.csv(bases[[nome]], sprintf("data/base_%s.csv", nome), row.names = F)
+}
 
 
-# Juntar colunas ----------------------------------------------------------
-# juntar colunas e remover linahs em branco
 
-bases <- bases %>%
-  filter(!is.na(CNPJ), (str_sub(CNPJ,1,1) %>% str_detect("[0-9]")))
-  mutate(
-    NOME_DA_INSTIUIÇÃO = ifelse(is.na(NOME_DA_INSTIUIÇÃO),NOME_INSTITUIÇÃO,NOME_DA_INSTIUIÇÃO),
-    NOME_DA_INSTIUIÇÃO = ifelse(is.na(NOME_DA_INSTIUIÇÃO),NOME_INSTITUIÇÃO_PARTICIPANTE,NOME_DA_INSTIUIÇÃO)
-  )
 
